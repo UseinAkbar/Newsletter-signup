@@ -1,6 +1,7 @@
 const express = require('express');
 const request = require('request');
 const bodyParser = require('body-parser');
+const https = require('https')
 const app = express();
 
 app.use(bodyParser.urlencoded({
@@ -12,6 +13,10 @@ app.use(express.static('public'));
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/signup.html');
+})
+
+app.get('/issuescontact', function(req, res) {
+  res.sendFile(__dirname + '/contact.html');
 })
 
 app.post('/', function(req, res) {
@@ -33,35 +38,47 @@ app.post('/', function(req, res) {
     ]
   }
 
-  var jsonData = JSON.stringify(data);
-
-  var options = {
-    url: 'https://us4.api.mailchimp.com/3.0/lists/0d52153518',
+  const jsonData = JSON.stringify(data);
+  const url = 'https://us4.api.mailchimp.com/3.0/lists/0d52153518';
+  const options = {
     method: 'POST',
-    headers: {
-      'Authorization': 'useinakbar c4715e618051482d131823af8761d0ad-us4'
-    },
-    body:jsonData
+    auth: 'useinakbar:c4715e618051482d131823af8761d0ad-us4'
   }
 
-  request(options, function(error, response, body) {
-    
-    if(error) {
-      res.sendFile(__dirname + '/failure.html');
+const request = https.request(url, options, function(response) {
+
+    if(response.statusCode === 200) {
+      res.sendFile(__dirname + '/success.html');
     } else {
-      if(response.statusCode === 200) {
-        res.sendFile(__dirname + '/success.html');
-      }
-      else {
-        res.sendFile(__dirname + '/failure.html');
-      }
+      res.sendFile(__dirname + '/failure.html');
     }
 
+
+  response.on('data', function(data) {
+    console.log(JSON.parse(data));
   })
+})
+
+    request.write(jsonData);
+    request.end();
+
+
+
+
+});
+
+app.post('/success', function(req, res) {
+  res.redirect('/');
 })
 
 app.post('/failure', function(req, res) {
   res.redirect('/');
+})
+
+app.post('/issues', function(req, res) {
+  res.write('<h1>Thank you for your participations of the solving this problem</h1>');
+  res.write('<p><a href="/">Click here</a> to get back to our homepage.');
+  res.send();
 })
 
 //List ID
