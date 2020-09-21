@@ -1,7 +1,7 @@
 const express = require('express');
 const request = require('request');
 const bodyParser = require('body-parser');
-const https = require('https')
+const https = require('https');
 const app = express();
 
 app.use(bodyParser.urlencoded({
@@ -52,7 +52,6 @@ const request = https.request(url, options, function(response) {
     } else {
       res.sendFile(__dirname + '/failure.html');
     }
-
 
   response.on('data', function(data) {
     console.log(JSON.parse(data));
